@@ -48,11 +48,10 @@ namespace api
                               boost_response& response);
         void onHiveOSGetTotalHashrate(boost_socket& socket,
                                 boost_response& response);
-        void onWebGetStats(boost_socket& socket,
-                                    boost_response& response);
-        void onPauseMiner(boost_socket& socket,
-                                        boost_response& response);
-        void onResumeMiner(boost_socket& socket,
+        void onPauseMiner(boost_socket& socket, boost_response& response,
+                                boost::beast::http::request<boost::beast::http::string_body> const& request
+                                );
+        void onMinerStatus(boost_socket& socket,
                                     boost_response& response);
     };
 }

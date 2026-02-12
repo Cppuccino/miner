@@ -84,19 +84,14 @@ void api::ServerAPI::onMessage(
         onHiveOSGetTotalHashrate(socket, response);
         response.result(boost_http::status::ok);
     }
-    else if ("/api/get_stats" == target)
+    else if ("/api/miner/pause" == target)
     {
-        onWebGetStats(socket, response);
+        onPauseMiner(socket, response, request);
         response.result(boost_http::status::ok);
     }
-    else if ("/api/pause_miner" == target)
+    else if ("/api/miner/status" == target)
     {
-        onPauseMiner(socket, response);
-        response.result(boost_http::status::ok);
-    }
-    else if ("/api/resume_miner" == target)
-    {
-        onResumeMiner(socket, response);
+        onMinerStatus(socket, response);
         response.result(boost_http::status::ok);
     }
     else
@@ -217,8 +212,7 @@ void api::ServerAPI::onHiveOSGetTotalHashrate(
     boost::beast::http::write(socket, response);
 }
 
-
-void api::ServerAPI::onWebGetStats(
+void api::ServerAPI::onMinerStatus(
     boost_socket& socket,
     boost_response& response)
 {
@@ -277,6 +271,7 @@ void api::ServerAPI::onWebGetStats(
     shares.push_back(0);                         // share invalid
     shares.push_back(sharesInvalidGpus.c_str()); // shares invalid by gpus
 
+    root["paused"] = true;
     root["hs"] = hs;
     root["temp"] = temp;
     root["fan"] = fan;
@@ -293,53 +288,28 @@ void api::ServerAPI::onWebGetStats(
 
 void api::ServerAPI::onPauseMiner(
     boost_socket& socket,
-    boost_response& response)
+    boost_response& response,
+    boost::beast::http::request<boost::beast::http::string_body> const& request
+)
 {
-    ////////////////////////////////////////////////////////////////////////////
-    std::string version
-    {
-        std::to_string(common::VERSION_MAJOR)
-        + "."
-        + std::to_string(common::VERSION_MINOR)
-    };
+    bool paused = false;
 
-    ////////////////////////////////////////////////////////////////////////////
+    try {
+        auto body = boost::json::parse(request.body());
+        if(body.is_object() && body.as_object().contains("paused"))
+            paused = body.at("paused").as_bool();
+    } catch (std::exception& e) {
+        logErr() << "Invalid JSON in onPauseMiner: " << e.what();
+        // You can still return a safe response
+    }
+
+    // Build JSON response
     boost::json::object root;
+    root["paused"] = paused;
 
-    root["pause"] = true;
-
-    ////////////////////////////////////////////////////////////////////////////
     response.body() = boost::json::serialize(root);
     response.prepare_payload();
     response.set("Access-Control-Allow-Origin", "*");
 
-    ////////////////////////////////////////////////////////////////////////////
-    boost::beast::http::write(socket, response);
-}
-
-
-void api::ServerAPI::onResumeMiner(
-    boost_socket& socket,
-    boost_response& response)
-{
-    ////////////////////////////////////////////////////////////////////////////
-    std::string version
-    {
-        std::to_string(common::VERSION_MAJOR)
-        + "."
-        + std::to_string(common::VERSION_MINOR)
-    };
-
-    ////////////////////////////////////////////////////////////////////////////
-    boost::json::object root;
-
-    root["pause"] = false;
-
-    ////////////////////////////////////////////////////////////////////////////
-    response.body() = boost::json::serialize(root);
-    response.prepare_payload();
-    response.set("Access-Control-Allow-Origin", "*");
-
-    ////////////////////////////////////////////////////////////////////////////
     boost::beast::http::write(socket, response);
 }

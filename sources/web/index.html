@@ -2,26 +2,59 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>GPU Miner Stats</title>
+  <title>LuminousMiner Dashboard</title>
   <link rel="stylesheet" href="index.css">
 </head>
 <body>
-  <h1>GPU Miner Stats</h1>
-  <div class="info">
-    <span class="uptime"></span>
-    <span class="ver"></span>
-    <span class="updated"></span>
-    <button class="pause-btn" onclick="pauseMiner()">Pause</button>
+
+  <div class="container">
+    <header class="header">
+      <div class="title">
+        <h1>LuminousMiner</h1>
+        <span class="version ver"></span>
+      </div>
+
+      <div class="controls">
+        <button class="pause-btn" onclick="pauseMiner()">Pause</button>
+      </div>
+    </header>
+
+    <section class="summary">
+      <div class="card">
+        <div class="card-label">Uptime</div>
+        <div class="card-value uptime"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Total Hashrate</div>
+        <div class="card-value total-hashrate">-- MH/s</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Last Update</div>
+        <div class="card-value updated"></div>
+      </div>
+    </section>
+
+    <section class="table-section">
+      <table id="stats-table">
+        <thead>
+          <tr>
+            <th>GPU</th>
+            <th>Hashrate</th>
+            <th>Temp</th>
+            <th>Fan</th>
+            <th>Power</th>
+            <th>Shares (A/R)</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </section>
+
   </div>
-  <table id="stats-table">
-    <tr>
-      <th>GPU</th>
-      <th>Hashrate</th>
-      <th>Temperature</th>
-      <th>Fan</th>
-      <th>Shares<br>(accepted/rejected)</th>
-    </tr>
-  </table>
+
   <script src="index.js"></script>
 </body>
 </html>

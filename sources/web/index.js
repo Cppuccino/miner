@@ -56,17 +56,13 @@ async function pauseMiner() {
   updateButton(true);
 
   try {
-    const response = await fetch('http://127.0.0.1:8080/api/miner/pause', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paused: !isPaused })
-    });
+    const response = await fetch('http://localhost:8080/api/miner/pause');
 
     if (!response.ok)
       throw new Error(`HTTP ${response.status}`);
 
     const data = await response.json();
-
+    console.log(data);
     isPaused = data.paused;
     updateButton(false);
 

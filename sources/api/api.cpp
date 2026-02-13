@@ -86,7 +86,7 @@ void api::ServerAPI::onMessage(
     }
     else if ("/api/miner/pause" == target)
     {
-        onPauseMiner(socket, response, request);
+        onPauseMiner(socket, response);
         response.result(boost_http::status::ok);
     }
     else if ("/api/miner/status" == target)
@@ -281,59 +281,12 @@ void api::ServerAPI::onMinerStatus(
 
 void api::ServerAPI::onPauseMiner(
     boost_socket& socket,
-    boost_response& response,
-    boost_request const& request
+    boost_response& response
 )
 {
-bool paused = false; 
+    auto& deviceManager{ device::DeviceManager::instance() };
 
-std::string bodyStr = request.body();
-if (!bodyStr.empty())
-{
-    try
-    {
-
-        boost::json::value jv = boost::json::parse(bodyStr);
-
-
-        if (jv.is_object())
-        {
-            auto& obj = jv.as_object();
-            auto it = obj.find("paused");
-            if (it != obj.end() && it->value().is_bool())
-            {
-                paused = it->value().as_bool();
-            }
-        }
-    }
-    catch (boost::json::system_error& e)
-    {
-        logErr() << "[api::ServerAPI::onPauseMiner] Invalid JSON: " << e.what();
-    }
-}
-else
-{
-    logInfo() << "[api::ServerAPI::onPauseMiner] Empty request body, using default paused=false";
-}
-
-auto& deviceManager{ device::DeviceManager::instance() };
-std::vector<device::Device*> devices{ deviceManager.getDevices() };
-    for (device::Device* device : devices)
-    {
-
-        if (nullptr != device)
-        {
-            if (paused)
-            {
-                device->pause();
-            }else{
-                 device->resume();
-            }
-            
-            
-        }
-
-    }
+    bool paused = deviceManager.pauseDevices();
 
     boost::json::object root;
     root["paused"] = paused;
@@ -341,8 +294,6 @@ std::vector<device::Device*> devices{ deviceManager.getDevices() };
     response.body() = boost::json::serialize(root);
     response.prepare_payload();
     response.set("Access-Control-Allow-Origin", "*");
-
-
 
     boost::beast::http::write(socket, response);
 }

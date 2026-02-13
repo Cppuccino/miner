@@ -29,6 +29,7 @@
 void device::Device::setAlgorithm(
     algo::ALGORITHM newAlgorithm)
 {
+    logDebug() << "device::Device::setAlgorithm()";
     ////////////////////////////////////////////////////////////////////////////
     common::Config const& config { common::Config::instance() };
 
@@ -351,6 +352,7 @@ void device::Device::setAlgorithm(
         }
     }
 
+
     ////////////////////////////////////////////////////////////////////////////
     if (nullptr == resolver)
     {
@@ -435,7 +437,11 @@ void device::Device::kill(
             break;
         }
     }
+
     alive.store(false, boost::memory_order::seq_cst);
+    
+    
+    
 }
 
 
@@ -450,12 +456,73 @@ bool device::Device::isComputing() const
     return computing.load(boost::memory_order::relaxed);
 }
 
+bool device::Device::isSleeping() const
+{
+    return sleeping.load(boost::memory_order::relaxed);
+}
+
+void device::Device::togglePause()
+{
+    bool wasSleeping = sleeping.load();
+    sleeping.store(!wasSleeping);
+
+    if (wasSleeping)
+        deviceInfo() << "Resumed";
+    else
+        deviceInfo() << "Paused";
+}
+
+void device::Device::pause()
+{
+    if (sleeping.load())
+        return;
+
+    sleeping.store(true);         
+    alive.store(false); 
+    if (threadDoWork.joinable()) {
+        threadDoWork.join();
+        resolver->~Resolver();
+        resolver = nullptr;
+    }
+
+
+    deviceInfo() << "Device paused and resolver deleted";
+}
+
+void device::Device::resume()
+{
+    if (!sleeping.load())
+        return;
+
+    sleeping.store(false);        
+    alive.store(true);
+    setAlgorithm(algorithm);
+
+    synchronizer.memory.add(1ull);
+    synchronizer.constant.add(1ull);
+   
+
+
+    if (!isComputing())
+    {
+        cleanJob();
+        run();
+    }
+    
+
+    deviceInfo() << "Device resumed and mining restarted";
+}
 
 void device::Device::update(
     bool const memory,
     bool const constants,
     stratum::StratumJobInfo const& newJobInfo)
 {
+    if (sleeping.load())
+    {
+        return;
+    }
+    
     nextjobInfo.copy(newJobInfo);
     nextjobInfo.nonce += (nextjobInfo.gapNonce * id);
 
@@ -550,6 +617,11 @@ void device::Device::cleanJob()
 
 bool device::Device::updateJob()
 {
+    ////////////////////////////////////////////////////////////////////////////
+    if (sleeping.load())
+    {
+        return false;
+    }
     ////////////////////////////////////////////////////////////////////////////
     common::Chrono chrono{};
     bool const needUpdateJob{ synchronizer.job.isEqual() == false ? true : false };
@@ -658,8 +730,13 @@ void device::Device::loopDoWork()
     ////////////////////////////////////////////////////////////////////////////
     if (false == initialize())
     {
+        logInfo() << "Failed to initialize() in loopDoWork";
         return;
     }
+    else{
+        logInfo() << "Run to initialize() in loopDoWork successfully";
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////
     if (nullptr == resolver)
@@ -680,9 +757,13 @@ void device::Device::loopDoWork()
     while (   true == isAlive()
            && nullptr != resolver)
     {
+        if (sleeping.load())
+        {
+            break;
+        }
         // Check and update the job.
         // Do not compute directly after update device.
-        // A new job can spawn during the update.
+        // A new job can spawn during the update.        
         if (true == updateJob())
         {
             continue;
@@ -705,7 +786,6 @@ void device::Device::loopDoWork()
 
     ////////////////////////////////////////////////////////////////////////////
     cleanUp();
-
     ////////////////////////////////////////////////////////////////////////////
     computing.store(false, boost::memory_order::seq_cst);
 }

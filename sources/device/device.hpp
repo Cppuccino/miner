@@ -27,7 +27,8 @@ namespace device
         UPDATE_MEMORY_FAIL,
         UPDATE_CONSTANT_FAIL,
         KERNEL_EXECUTE_FAIL,
-        DISABLE
+        DISABLE,
+        PAUSE
     };
 
     struct Device
@@ -59,6 +60,10 @@ namespace device
         void kill(device::KILL_STATE const state);
         bool isAlive() const;
         bool isComputing() const;
+        void togglePause();
+        bool isSleeping() const;
+        void pause();
+        void resume();
         void update(bool const memory,
                     bool const constants,
                     stratum::StratumJobInfo const& newJobInfo);
@@ -92,6 +97,7 @@ namespace device
 
         boost::atomic_bool           alive{ false };
         boost::atomic_bool           computing{ false };
+        boost::atomic_bool           sleeping{ false };
         boost::thread                threadDoWork{};
         boost::condition_variable    notifyNewWork{};
         stratum::Stratum*            stratum{ nullptr };

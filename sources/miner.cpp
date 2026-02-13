@@ -6,7 +6,11 @@
 #include <common/log/log.hpp>
 #include <device/device_manager.hpp>
 #include <network/network.hpp>
+#include <conio.h>
+#include <atomic>
 
+std::atomic<bool> running{ true };
+device::DeviceManager& deviceManager{ device::DeviceManager::instance() };
 
 static void welcome()
 {
@@ -17,15 +21,40 @@ static void welcome()
         << std::to_string(common::VERSION_MINOR);
 }
 
+void keyboardListener()
+{
+    while (running)
+    {
+        if (_kbhit())
+        {
+            char c = _getch();
+            if (c == 'p')
+            {
+                for (device::Device* device : deviceManager.getDevices())
+                {
+                    if (!device) continue;
+
+                    if (!device->isSleeping())
+                        device->pause();
+                    else
+                        device->resume();
+                }
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+}
+
 
 int main(
     int const argc,
     char** argv)
 {
+    std::thread keyboardThread(keyboardListener);
     try
     {
         ////////////////////////////////////////////////////////////////////////
-        device::DeviceManager& deviceManager{ device::DeviceManager::instance() };
+       
         common::Config& config{ common::Config::instance() };
         api::ServerAPI serverAPI{};
 
@@ -67,6 +96,7 @@ int main(
     }
 
     ////////////////////////////////////////////////////////////////////////////
+    keyboardThread.join();
     logInfo() << "quitting...";
     return 0;
 }

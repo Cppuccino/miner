@@ -8,7 +8,6 @@
 #include <common/cast.hpp>
 #include <common/custom.hpp>
 #include <common/log/log.hpp>
-#include <common/pause_state.hpp>
 #include <device/device_manager.hpp>
 
 
@@ -218,6 +217,7 @@ void api::ServerAPI::onMinerStatus(
     boost_response& response)
 {
     ////////////////////////////////////////////////////////////////////////////
+    // Version
     std::string version
     {
         std::to_string(common::VERSION_MAJOR)
@@ -226,67 +226,57 @@ void api::ServerAPI::onMinerStatus(
     };
 
     ////////////////////////////////////////////////////////////////////////////
+    // Root object
     boost::json::object root
     {
-        { "hs", boost::json::array{} },         // Hashrates by device (GPU)
-        { "hs_units", "hs" },                   // Optional: units that are uses for hashes array, "hs", "khs", "mhs", ... Default "khs"
-        { "temp", boost::json::array{} },       // Temperature by device (GPU)
-        { "fan", boost::json::array{} },        // Fans speed by device (GPU)
-        { "uptime", 0 },                        // Seconds elapsed from miner stats
-        { "ver", version },                     // Miner version currently run
-        { "shares", boost::json::array{} },     // Acceped and rejected shares
+        { "gpus", boost::json::array{} },
+        { "uptime", 0 },
+        { "ver", version }
     };
-    boost::json::array hs{};
-    boost::json::array temp{};
-    boost::json::array fan{};
-    boost::json::array shares{};
+
+    boost::json::array gpus{};
 
     ////////////////////////////////////////////////////////////////////////////
-    uint64_t sharesValid { 0ull };
-    uint64_t sharesInvalid { 0ull };
-    std::string sharesInvalidGpus{};
+    // Totals
+    uint64_t sharesValid{ 0ull };
+    uint64_t sharesInvalid{ 0ull };
 
     ////////////////////////////////////////////////////////////////////////////
     auto& deviceManager{ device::DeviceManager::instance() };
     std::vector<device::Device*> devices{ deviceManager.getDevices() };
-    for (device::Device* device : devices)
+
+    for (size_t i = 0; i < devices.size(); ++i)
     {
-        sharesInvalidGpus += "0;";
-        if (nullptr == device)
-        {
-            hs.push_back(0);
-        }
-        else
-        {
-            hs.push_back(castU64(device->getHashrate()));
+        device::Device* device = devices[i];
 
-            statistical::Statistical::ShareInfo shareInfo{ device->getShare() };
-            sharesInvalid += shareInfo.invalid;
-            sharesValid += shareInfo.valid;
-        }
-        temp.push_back(0);
-        fan.push_back(0);
+        boost::json::object gpu{};
+        
+        deviceManager.fetchDeviceStatsJson(device, gpu);
+
+        statistical::Statistical::ShareInfo shareInfo{ device->getShare() };
+
+        sharesValid += shareInfo.valid;
+        sharesInvalid += shareInfo.invalid;
+
+        boost::json::object shareObj{
+            { "valid", shareInfo.valid },
+            { "invalid", shareInfo.invalid }
+        };
+
+        gpu["shares"] = shareObj;
+
+        gpus.push_back(gpu);
     }
-    shares.push_back(sharesValid);               // share valid
-    shares.push_back(sharesInvalid);             // share rejected
-    shares.push_back(0);                         // share invalid
-    shares.push_back(sharesInvalidGpus.c_str()); // shares invalid by gpus
 
-    bool paused = g_paused.load(std::memory_order::relaxed);
-
-    root["paused"] = paused;
-    root["hs"] = hs;
-    root["temp"] = temp;
-    root["fan"] = fan;
-    root["shares"] = shares;
+    root["gpus"] = gpus;
 
     ////////////////////////////////////////////////////////////////////////////
     response.body() = boost::json::serialize(root);
     response.prepare_payload();
     response.set("Access-Control-Allow-Origin", "*");
 
-    ////////////////////////////////////////////////////////////////////////////
     boost::beast::http::write(socket, response);
+
 }
 
 void api::ServerAPI::onPauseMiner(
@@ -326,7 +316,24 @@ else
     logInfo() << "[api::ServerAPI::onPauseMiner] Empty request body, using default paused=false";
 }
 
-    g_paused.store(paused);
+auto& deviceManager{ device::DeviceManager::instance() };
+std::vector<device::Device*> devices{ deviceManager.getDevices() };
+    for (device::Device* device : devices)
+    {
+
+        if (nullptr != device)
+        {
+            if (paused)
+            {
+                device->pause();
+            }else{
+                 device->resume();
+            }
+            
+            
+        }
+
+    }
 
     boost::json::object root;
     root["paused"] = paused;

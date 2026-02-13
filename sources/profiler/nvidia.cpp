@@ -68,6 +68,8 @@ bool profiler::Nvidia::load()
     nvmlShutdown = reinterpret_cast<NVMLShutdown>(loadFunction("nvmlShutdown"));
     nvmlDeviceGetHandleByIndex = reinterpret_cast<NVMLDeviceGetHandleByIndex>(loadFunction("nvmlDeviceGetHandleByIndex"));
     nvmlDeviceGetPowerUsage = reinterpret_cast<NVMLDeviceGetPowerUsage>(loadFunction("nvmlDeviceGetPowerUsage"));
+    nvmlDeviceGetFanSpeed = reinterpret_cast<NVMLDeviceGetFanSpeed>(loadFunction("nvmlDeviceGetFanSpeed"));
+    nvmlDeviceGetTemperature = reinterpret_cast<NVMLDeviceGetTemperature>(loadFunction("nvmlDeviceGetTemperature"));
     nvmlDeviceGetClockInfo = reinterpret_cast<NVMLDeviceGetClockInfo>(loadFunction("nvmlDeviceGetClockInfo"));
     nvmlDeviceGetUtilizationRates = reinterpret_cast<NVMLDeviceGetUtilizationRates>(loadFunction("nvmlDeviceGetUtilizationRates"));
     nvmlErrorString = reinterpret_cast<NVMLErrorString>(loadFunction("nvmlErrorString"));
@@ -76,6 +78,8 @@ bool profiler::Nvidia::load()
     IS_NULL(nvmlShutdown);
     IS_NULL(nvmlDeviceGetHandleByIndex);
     IS_NULL(nvmlDeviceGetPowerUsage);
+    IS_NULL(nvmlDeviceGetFanSpeed);
+    IS_NULL(nvmlDeviceGetTemperature);
     IS_NULL(nvmlDeviceGetClockInfo);
     IS_NULL(nvmlDeviceGetUtilizationRates);
     IS_NULL(nvmlErrorString);
@@ -119,6 +123,21 @@ double profiler::Nvidia::getPowerUsage(nvmlDevice_t device)
     NVML_CALL(nvmlDeviceGetPowerUsage(device, &power));
     return castDouble(power) / 1000.0;
 }
+
+double profiler::Nvidia::getFanSpeed(nvmlDevice_t device)
+{
+    uint32_t fanSpeed{ 0u };
+    NVML_CALL(nvmlDeviceGetFanSpeed(device, &fanSpeed));
+    return castDouble(fanSpeed);
+}
+
+double profiler::Nvidia::getTemperature(nvmlDevice_t device)
+{
+    uint32_t temperature{ 0u };
+    NVML_CALL(nvmlDeviceGetTemperature(device, NVML_TEMPERATURE_GPU, &temperature));
+    return castDouble(temperature);
+}
+
 
 
 uint32_t profiler::Nvidia::getCoreClock(nvmlDevice_t device)

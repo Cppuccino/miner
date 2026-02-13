@@ -16,6 +16,8 @@ namespace profiler
         void unload();
         bool init(uint32_t const id, nvmlDevice_t* device);
         double getPowerUsage(nvmlDevice_t device);
+        double getFanSpeed(nvmlDevice_t device);
+        double getTemperature(nvmlDevice_t device);
         uint32_t getCoreClock(nvmlDevice_t device);
         uint32_t getMemoryClock(nvmlDevice_t device);
         uint32_t getUtilizationRate(nvmlDevice_t device);
@@ -31,6 +33,8 @@ namespace profiler
         using NVMLShutdown = nvmlReturn_t(*)();
         using NVMLDeviceGetHandleByIndex = nvmlReturn_t(*)(unsigned int, nvmlDevice_t*);
         using NVMLDeviceGetPowerUsage = nvmlReturn_t(*)(nvmlDevice_t, unsigned int*);
+        using NVMLDeviceGetFanSpeed = nvmlReturn_t(*)(nvmlDevice_t, unsigned int*);
+        using NVMLDeviceGetTemperature = nvmlReturn_t(*)(nvmlDevice_t,nvmlTemperatureSensors_t,unsigned int*);
         using NVMLDeviceGetClockInfo = nvmlReturn_t(*)(nvmlDevice_t, nvmlClockType_t, unsigned int*);
         using NVMLDeviceGetUtilizationRates = nvmlReturn_t(*)(void*, void*);
         using NVMLErrorString = const char*(*)(nvmlReturn_t);
@@ -39,6 +43,8 @@ namespace profiler
         NVMLShutdown                   nvmlShutdown{ nullptr };
         NVMLDeviceGetHandleByIndex     nvmlDeviceGetHandleByIndex{ nullptr };
         NVMLDeviceGetPowerUsage        nvmlDeviceGetPowerUsage{ nullptr };
+        NVMLDeviceGetFanSpeed          nvmlDeviceGetFanSpeed{ nullptr };
+        NVMLDeviceGetTemperature       nvmlDeviceGetTemperature{ nullptr };
         NVMLDeviceGetClockInfo         nvmlDeviceGetClockInfo{ nullptr };
         NVMLDeviceGetUtilizationRates  nvmlDeviceGetUtilizationRates{ nullptr };
         NVMLErrorString                nvmlErrorString{ nullptr };

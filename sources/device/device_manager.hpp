@@ -42,7 +42,7 @@ namespace device
 
         void onSmartMiningSetAlgorithm(algo::ALGORITHM const algorithm);
         void onSmartMiningUpdateJob(stratum::StratumJobInfo const& newJobInfo);
-
+        void fetchDeviceStatsJson(device::Device* const device, boost::json::object& gpu);
     private:
         DeviceManager() = default;
 

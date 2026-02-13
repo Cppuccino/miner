@@ -1,6 +1,5 @@
 #include <string>
 
-
 #include <algo/algo_type.hpp>
 #include <common/config.hpp>
 #include <common/date.hpp>
@@ -119,6 +118,7 @@ void device::DeviceManager::loopStatistical()
         }
     }
 }
+
 
 
 void device::DeviceManager::showMiningStats(
@@ -291,4 +291,67 @@ void device::DeviceManager::showDeviceStats(
             common::doubleToString(cost)
         }
     );
+}
+
+
+void device::DeviceManager::fetchDeviceStatsJson(device::Device* const device, boost::json::object &gpu){
+    
+    double power{ 0.0 };
+    double fanSpeed{ 0.0 };
+    double temp{ 0.0 };
+
+       switch(device->deviceType)
+    {
+#if defined(CUDA_ENABLE)
+        case device::DEVICE_TYPE::NVIDIA:
+        {
+            if (   nullptr != device->deviceNvml
+                && true == profilerNvidia.valid)
+            {
+                power = profilerNvidia.getPowerUsage(device->deviceNvml);
+                fanSpeed = profilerNvidia.getFanSpeed(device->deviceNvml);
+                temp = profilerNvidia.getTemperature(device->deviceNvml);
+            }
+            break;
+        }
+#endif
+#if defined(AMD_ENABLE)
+        case device::DEVICE_TYPE::AMD:
+        {
+            if (true == profilerAmd.valid)
+            {
+                auto const activity{ profilerAmd.getCurrentActivity(device->id) };
+                power = activity.iActivityPercent;
+            }
+            break;
+        }
+#endif
+    }
+    
+    gpu["id"] = static_cast<uint32_t>(device->id);
+
+        if (nullptr == device)
+        {
+            gpu["hs"] = 0;
+            gpu["temp"] = 0;
+            gpu["fan"] = 0;
+            gpu["power"] = 0;
+
+            boost::json::object shareObj{
+                { "valid", 0 },
+                { "invalid", 0 }
+            };
+
+            gpu["shares"] = shareObj;
+        }
+        else
+        {
+            uint64_t hashrate = castU64(device->getHashrate());
+            gpu["hs"] = hashrate;
+
+            gpu["temp"] = temp;
+            gpu["fan"] = fanSpeed;
+            gpu["power"] = power;
+        }
+
 }

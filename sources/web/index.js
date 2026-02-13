@@ -30,20 +30,20 @@ async function fetchStatsAndDisplay() {
   isPaused = data.paused;
   updateButton(false);
 
-  document.querySelector('.uptime').textContent = formatUptime(data.uptime);
-  document.querySelector('.ver').textContent = `v${data.version}`;
+  document.querySelector('.uptime').textContent = data.uptime;
+  document.getElementById('version').innerHTML = `v${data.ver}`;
 
   const tbody = document.querySelector('#stats-table tbody');
   tbody.innerHTML = '';
   data.gpus.forEach(gpu => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-          <td>${gpu.name}</td>
-          <td>${(gpu.hashrate / 1e6).toFixed(2)} MH/s</td>
-          <td>${gpu.temperature}°C</td>
+          <td>${gpu.id}</td>
+          <td>${(gpu.hs / 1e6).toFixed(2)} MH/s</td>
+          <td>${gpu.temp}°C</td>
           <td>${gpu.fan}%</td>
           <td>${gpu.power} W</td>
-          <td>${gpu.shares.accepted}/${gpu.shares.rejected}</td>
+          <td>${gpu.shares.valid}/${gpu.shares.invalid}</td>
       `;
       tbody.appendChild(tr);
   });

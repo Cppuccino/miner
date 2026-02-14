@@ -30,7 +30,6 @@ void keyboardListener()
             char c = _getch();
             if (c == 'p' || c == 'P')
             {
-                deviceManager.disconnectFromPools();
                 deviceManager.pauseDevices();
             }
         }

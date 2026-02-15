@@ -746,20 +746,28 @@ stratum::Stratum* device::DeviceManager::getOrCreateStratum(
 
 bool device::DeviceManager::pauseDevices()
 {
+    bool anyRunning = false;
+
     for (device::Device* const device : getDevices())
     {
         if (!device) continue;
 
         if (!device->isSleeping())
         {
-            device->pause();
-            return true;
+            anyRunning = true;
+            break;
         }
-        else
-        {
-            device->resume();
-            return false;
-        }
-
     }
+
+    for (device::Device* const device : getDevices())
+    {
+        if (!device) continue;
+
+        if (anyRunning)
+            device->pause();
+        else
+            device->resume();
+    }
+
+    return anyRunning;
 }

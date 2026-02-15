@@ -475,6 +475,7 @@ void device::Device::pause()
 
     synchronizer.memory.reset();
     synchronizer.constant.reset();
+    synchronizer.job.reset();
 
     deviceInfo() << "Device paused";
 }
@@ -489,6 +490,8 @@ void device::Device::resume()
     sleeping.store(false, boost::memory_order::seq_cst);        
     alive.store(true, boost::memory_order::seq_cst);
 
+    synchronizer.memory.add(1ull);
+    synchronizer.constant.add(1ull);
 
     cleanJob();
     run();
@@ -599,8 +602,11 @@ void device::Device::cleanJob()
 bool device::Device::updateJob()
 {
     ////////////////////////////////////////////////////////////////////////////
-        if (true == isSleeping())
-            return false;
+    if (true == isSleeping()) 
+    {
+        return false;
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////
     common::Chrono chrono{};

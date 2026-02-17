@@ -48,9 +48,8 @@ namespace api
                               boost_response& response);
         void onHiveOSGetTotalHashrate(boost_socket& socket,
                                 boost_response& response);
-        void onPauseMiner(boost_socket& socket, boost_response& response,
-                                boost_request const& request
-                                );
+        void onPauseMiner(boost_socket& socket, 
+                            boost_response& response);
         void onMinerStatus(boost_socket& socket,
                                     boost_response& response);
     };

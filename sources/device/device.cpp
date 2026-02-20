@@ -630,7 +630,6 @@ bool device::Device::updateJob()
         miningStats.reset();
     }
     currentJobInfo.copy(nextjobInfo);
-    logInfo() << "currentAtomicJob:" << currentAtomicJob;
     synchronizer.job.update(currentAtomicJob);
 
     ////////////////////////////////////////////////////////////////////////////

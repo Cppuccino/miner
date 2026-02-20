@@ -471,11 +471,9 @@ void device::Device::pause()
         return;
 
     sleeping.store(true,boost::memory_order::seq_cst);         
-    //alive.store(false, boost::memory_order::seq_cst); 
 
-    synchronizer.memory.reset();
-    synchronizer.constant.reset();
-
+    synchronizer.memory.add(1ull);
+    synchronizer.constant.add(1ull);
 
     deviceInfo() << "Device paused";
 }
@@ -488,15 +486,11 @@ void device::Device::resume()
     setAlgorithm(algorithm);
 
     sleeping.store(false, boost::memory_order::seq_cst);        
-    //alive.store(true, boost::memory_order::seq_cst);
-
-    synchronizer.memory.add(1ull);
-    synchronizer.constant.add(1ull);
 
     cleanJob();
     run();
     
-    deviceInfo() << "Device resumed and mining restarted";
+    deviceInfo() << "Device resumed";
 }
 
 void device::Device::update(
@@ -587,6 +581,7 @@ void device::Device::waitJob()
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
+    logInfo() << "Not in waitJob() anymore";
 }
 
 
@@ -635,6 +630,7 @@ bool device::Device::updateJob()
         miningStats.reset();
     }
     currentJobInfo.copy(nextjobInfo);
+    logInfo() << "currentAtomicJob:" << currentAtomicJob;
     synchronizer.job.update(currentAtomicJob);
 
     ////////////////////////////////////////////////////////////////////////////

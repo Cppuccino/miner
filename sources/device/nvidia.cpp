@@ -55,6 +55,7 @@ bool device::DeviceNvidia::initialize()
 
 void device::DeviceNvidia::cleanUp()
 {
+
     cudaError_t cuCodeError{ cudaDeviceReset() };
     if (cudaSuccess != cuCodeError)
     {
@@ -62,5 +63,20 @@ void device::DeviceNvidia::cleanUp()
             << "cudaDeviceReset() failled: "
             << cudaGetErrorString(cuCodeError);
     }
+   
+    if (cuContext)
+    {
+        CUcontext current = nullptr;
+        cuCtxGetCurrent(&current);
+
+        if (current == cuContext)
+        {
+            cuCtxSetCurrent(nullptr);
+        }
+
+        cuCtxDestroy(cuContext);
+        cuContext = nullptr;
+    }
+
 }
 #endif

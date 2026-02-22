@@ -41,7 +41,7 @@ async function fetchStatsAndDisplay() {
 
   document.querySelector('.uptime').textContent = formatUptime(data.uptime);
   document.getElementById('version').innerHTML = `v${data.ver}`;
-
+  let totalHashRate = 0;
   const tbody = document.querySelector('#stats-table tbody');
   tbody.innerHTML = '';
   data.gpus.forEach(gpu => {
@@ -54,8 +54,10 @@ async function fetchStatsAndDisplay() {
           <td>${gpu.power} W</td>
           <td>${gpu.shares.valid}/${gpu.shares.invalid}</td>
       `;
+      totalHashRate = totalHashRate + (gpu.hs / 1e6);
       tbody.appendChild(tr);
   });
+  document.getElementsByClassName('total-hashrate')[0].innerHTML = `${totalHashRate.toFixed(2)} MH/s`;
 }
 
 async function pauseMiner() {

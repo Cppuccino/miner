@@ -15,7 +15,7 @@ bool device::DeviceAmd::initialize()
     clQueue[1] = cl::CommandQueue(clContext, clDevice);
 
     resolver::ResolverAmd* const resolverAmd{ dynamic_cast<resolver::ResolverAmd* const>(resolver) };
-    if (nullptr == resolverAmd)
+    if (nullptr == resolverAmd) [[unlikely]]
     {
         return false;
     }

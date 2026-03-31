@@ -335,7 +335,7 @@ void network::NetworkTCPClient::send(char const* data, size_t size)
 {
     UNIQUE_LOCK(txMutex);
 
-    if (nullptr == socketTCP)
+    if (nullptr == socketTCP) [[unlikely]]
     {
         logErr() << "Cannot send packet, socketTCP is nullptr!";
         return;

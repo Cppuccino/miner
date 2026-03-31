@@ -77,7 +77,7 @@ stratum::Stratum* stratum::NewStratum(algo::ALGORITHM const algorithm)
         }
     }
 
-    if (nullptr == stratum)
+    if (nullptr == stratum) [[unlikely]]
     {
         logErr() << "Fail alloc stratum for " << algorithm;
         return nullptr;

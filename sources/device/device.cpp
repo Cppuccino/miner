@@ -351,7 +351,7 @@ void device::Device::setAlgorithm(algo::ALGORITHM newAlgorithm)
     }
 
     ////////////////////////////////////////////////////////////////////////////
-    if (nullptr == resolver)
+    if (nullptr == resolver) [[unlikely]]
     {
         kill(device::KILL_STATE::RESOLVER_NULLPTR);
         return;

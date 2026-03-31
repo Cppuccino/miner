@@ -17,13 +17,13 @@ void* profiler::Amd::loadFunction(char const* name)
 {
 #ifdef _WIN32
     void* ptr{ castVOIDP(GetProcAddress(libModule, name)) };
-    if (nullptr == ptr)
+    if (nullptr == ptr) [[unlikely]]
     {
         logErr() << "Cannot load function: " << name << " (" << GetLastError() << ")";
     }
 #else
     void* ptr{ castVOIDP(dlsym(libModule, name)) };
-    if (nullptr == ptr)
+    if (nullptr == ptr) [[unlikely]]
     {
         logErr() << "Cannot load function: " << name << " (" << dlerror() << ")";
     }
@@ -37,7 +37,7 @@ bool profiler::Amd::load()
 {
 #ifdef _WIN32
     libModule = LoadLibrary("atiadlxx.dll"); // 64-bits
-    if (nullptr == libModule)
+    if (nullptr == libModule) [[unlikely]]
     {
         libModule = LoadLibrary("atiadlxy.dll"); // 32-bits
     }
@@ -45,7 +45,7 @@ bool profiler::Amd::load()
     libModule = dlopen("libatiadlxx.so", RTLD_LAZY);
 #endif
 
-    if (nullptr == libModule)
+    if (nullptr == libModule) [[unlikely]]
     {
         logErr() << "Cannot load ADL library";
         return false;

@@ -170,7 +170,7 @@ namespace algo
 
         uint32_t const lenght{ castU32(input.size()) };
         uint32_t*      fs{ NEW_ARRAY(uint32_t, lenght) };
-        if (nullptr == fs)
+        if (nullptr == fs) [[unlikely]]
         {
             return hash;
         }

@@ -180,7 +180,7 @@ void algo::ethash::ContextGenerator::buildLightCache(algo::ALGORITHM const algor
     size_t const  dataLength{ algo::LEN_HASH_512 + localDagContext.lightCache.size };
     localDagContext.data = NEW_ARRAY(char, dataLength);
     std::memset(localDagContext.data, 0, sizeof(char) * dataLength);
-    if (nullptr == localDagContext.data)
+    if (nullptr == localDagContext.data) [[unlikely]]
     {
         logErr() << "Cannot alloc context data";
         return;

@@ -73,11 +73,11 @@ bool resolver::ResolverAmdEthash::updateContext(stratum::StratumJobInfo const& j
 
 bool resolver::ResolverAmdEthash::updateMemory(stratum::StratumJobInfo const& jobInfo)
 {
-    if (nullptr == clContext)
+    if (nullptr == clContext) [[unlikely]]
     {
         return false;
     }
-    if (nullptr == clQueue[0] || nullptr == clQueue[1])
+    if (nullptr == clQueue[0] || nullptr == clQueue[1]) [[unlikely]]
     {
         return false;
     }

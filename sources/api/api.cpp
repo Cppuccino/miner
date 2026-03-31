@@ -129,7 +129,7 @@ void api::ServerAPI::onHiveOSGetStats(boost_socket& socket, boost_response& resp
     for (device::Device* device : devices)
     {
         sharesInvalidGpus += "0;";
-        if (nullptr == device)
+        if (nullptr == device) [[unlikely]]
         {
             hs.push_back(0);
         }
@@ -178,7 +178,7 @@ void api::ServerAPI::onHiveOSGetTotalHashrate(boost_socket& socket, boost_respon
     ////////////////////////////////////////////////////////////////////////////
     for (device::Device* device : devices)
     {
-        if (nullptr == device)
+        if (nullptr == device) [[unlikely]]
         {
             continue;
         }
@@ -228,7 +228,7 @@ void api::ServerAPI::onWebGetStats(boost_socket& socket, boost_response& respons
     for (device::Device* device : devices)
     {
         sharesInvalidGpus += "0;";
-        if (nullptr == device)
+        if (nullptr == device) [[unlikely]]
         {
             hs.push_back(0);
         }

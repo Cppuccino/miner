@@ -19,13 +19,13 @@ void* profiler::Nvidia::loadFunction(char const* name)
 {
 #ifdef _WIN32
     auto* ptr{ castVOIDP(GetProcAddress(libModule, name)) };
-    if (nullptr == ptr)
+    if (nullptr == ptr) [[unlikely]]
     {
         logErr() << "Cannot load function: " << name << " (" << GetLastError() << ")";
     }
 #else
     auto* ptr{ castVOIDP(dlsym(libModule, name)) };
-    if (nullptr == ptr)
+    if (nullptr == ptr) [[unlikely]]
     {
         logErr() << "Cannot load function: " << name << " (" << dlerror() << ")";
     }
@@ -55,7 +55,7 @@ bool profiler::Nvidia::load()
     }
 #endif
 
-    if (nullptr == libModule)
+    if (nullptr == libModule) [[unlikely]]
     {
         logErr() << "Cannot load nvml library!";
         return false;
@@ -104,7 +104,7 @@ void profiler::Nvidia::unload()
 
 bool profiler::Nvidia::init(uint32_t const id, nvmlDevice_t* device)
 {
-    if (nullptr == device)
+    if (nullptr == device) [[unlikely]]
     {
         logErr() << "Device is nullptr, cannot init profile nvidia";
         return false;

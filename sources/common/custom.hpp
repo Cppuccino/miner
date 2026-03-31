@@ -23,7 +23,7 @@
     }
 
 #define IS_NULL(function)                                                                                              \
-    if (nullptr == (function))                                                                                         \
+    if (nullptr == (function)) [[unlikely]]                                                                            \
     {                                                                                                                  \
         logErr() << "(" << __FUNCTION__ << ":" << __LINE__ << ")"                                                      \
                  << "(" << #function << ")"                                                                            \

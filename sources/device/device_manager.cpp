@@ -94,7 +94,7 @@ bool device::DeviceManager::initialize()
         initializeStratumSmartMining();
         for (device::Device* device : devices)
         {
-            if (nullptr == device)
+            if (nullptr == device) [[unlikely]]
             {
                 continue;
             }
@@ -105,7 +105,7 @@ bool device::DeviceManager::initialize()
     {
         for (device::Device* device : devices)
         {
-            if (nullptr == device)
+            if (nullptr == device) [[unlikely]]
             {
                 continue;
             }
@@ -212,7 +212,7 @@ bool device::DeviceManager::initializeStratum(uint32_t const deviceId, algo::ALG
     }
 
     stratum = getOrCreateStratum(algorithm, deviceId);
-    if (nullptr == stratum)
+    if (nullptr == stratum) [[unlikely]]
     {
         logErr() << "Cannot alloc memory for stratum!";
         return false;
@@ -276,7 +276,7 @@ bool device::DeviceManager::initializeMocker()
         for (uint32_t i{ 0u }; i < mockerCount; ++i)
         {
             device::DeviceMocker* device{ NEW(device::DeviceMocker) };
-            if (nullptr == device)
+            if (nullptr == device) [[unlikely]]
             {
                 return false;
             }
@@ -535,14 +535,14 @@ void device::DeviceManager::onShareStatus(bool const isValid, uint32_t const req
     ///////////////////////////////////////////////////////////////////////////
     for (device::Device* const device : devices)
     {
-        if (nullptr == device)
+        if (nullptr == device) [[unlikely]]
         {
             continue;
         }
         if (common::PROFILE::STANDARD == config.profile)
         {
             stratum::Stratum* stratum{ device->getStratum() };
-            if (nullptr == stratum || stratum->uuid != stratumUUID)
+            if (nullptr == stratum || stratum->uuid != stratumUUID) [[unlikely]]
             {
                 continue;
             }
@@ -569,7 +569,7 @@ void device::DeviceManager::onSmartMiningSetAlgorithm(algo::ALGORITHM const algo
     ////////////////////////////////////////////////////////////////////////////
     for (device::Device* device : devices)
     {
-        if (nullptr == device)
+        if (nullptr == device) [[unlikely]]
         {
             continue;
         }
@@ -584,7 +584,7 @@ void device::DeviceManager::onSmartMiningSetAlgorithm(algo::ALGORITHM const algo
     ////////////////////////////////////////////////////////////////////////////
     for (device::Device* device : devices)
     {
-        if (nullptr == device)
+        if (nullptr == device) [[unlikely]]
         {
             continue;
         }
@@ -616,7 +616,7 @@ void device::DeviceManager::updateDevice(
     ////////////////////////////////////////////////////////////////////////////
     for (device::Device* const device : devices)
     {
-        if (nullptr == device)
+        if (nullptr == device) [[unlikely]]
         {
             continue;
         }
@@ -624,7 +624,7 @@ void device::DeviceManager::updateDevice(
         if (common::PROFILE::STANDARD == config.profile)
         {
             stratum::Stratum* stratum{ device->getStratum() };
-            if (nullptr == stratum || stratum->uuid != stratumUUID)
+            if (nullptr == stratum || stratum->uuid != stratumUUID) [[unlikely]]
             {
                 continue;
             }
@@ -657,7 +657,7 @@ stratum::Stratum* device::DeviceManager::getOrCreateStratum(algo::ALGORITHM cons
     stratum = stratum::NewStratum(algorithm);
 
     ////////////////////////////////////////////////////////////////////////////
-    if (nullptr == stratum)
+    if (nullptr == stratum) [[unlikely]]
     {
         return nullptr;
     }

@@ -224,7 +224,7 @@ void benchmark::BenchmarkWorkflow::writeReport()
 bool benchmark::BenchmarkWorkflow::initCleanResult([[maybe_unused]] t_result** result)
 {
 #if defined(CUDA_ENABLE)
-    if (nullptr == *result)
+    if (nullptr == *result) [[unlikely]]
     {
         CU_ALLOC_HOST(result, sizeof(t_result));
     }
@@ -241,7 +241,7 @@ bool benchmark::BenchmarkWorkflow::initCleanResult([[maybe_unused]] t_result** r
 bool benchmark::BenchmarkWorkflow::initCleanResult32([[maybe_unused]] t_result_32** result)
 {
 #if defined(CUDA_ENABLE)
-    if (nullptr == *result)
+    if (nullptr == *result) [[unlikely]]
     {
         CU_ALLOC_HOST(result, sizeof(t_result_32));
     }
@@ -270,7 +270,7 @@ bool benchmark::BenchmarkWorkflow::initCleanResult32([[maybe_unused]] t_result_3
 bool benchmark::BenchmarkWorkflow::initCleanResult64([[maybe_unused]] t_result_64** result)
 {
 #if defined(CUDA_ENABLE)
-    if (nullptr == *result)
+    if (nullptr == *result) [[unlikely]]
     {
         CU_ALLOC_HOST(result, sizeof(t_result_64));
     }
